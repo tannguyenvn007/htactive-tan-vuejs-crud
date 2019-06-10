@@ -8,16 +8,17 @@
           <v-spacer></v-spacer>
           <v-btn @click="dialog = true" color="green darken-1 white--text" class="mb-2">Add User</v-btn>
           <DialogAdd
-          :dialog="dialog"
-          :formTitle="formTitle"
-          :editedItem="editedItem"
-          :roles="roles"
-          @saveData="save"
-          @closeModel="close"
-        />
+            :dialog="dialog"
+            :formTitle="formTitle"
+            :editedItem="editedItem"
+            :roles="roles"
+            :editedIndex="editedIndex"
+            @editData="editData"
+            @saveData="saveData"
+            @closeModel="close"
+          />
         </v-toolbar>
-        
-      </v-flex> 
+      </v-flex>
     </v-layout>
     <v-data-table
       :headers="headers"
@@ -35,18 +36,14 @@
         <td class>{{ props.item.status }}</td>
         <td class="layout px-0">
           <v-icon small class="mr-2" @click="editItem(props.item)">edit</v-icon>
-          <v-icon small @click="dialogDelete = true">delete</v-icon>
+          <v-icon small @click="deleteItem(props.item)">delete</v-icon>
         </td>
       </template>
       <template v-slot:no-data>
         <v-btn color="green darken-1 white--text" @click="initialize">Reset</v-btn>
       </template>
     </v-data-table>
-    <DialogDelete
-      :dialogDelete="dialogDelete"
-      @yes="deleteItem(desserts) "
-      @no=" dialogDelete = false "
-    />
+    <DialogDelete :dialogDelete="dialogDelete" @yes="deleteItems " @no=" dialogDelete = false "/>
   </div>
 </template>
 <script>
@@ -59,11 +56,11 @@ export default {
     DialogDelete
   },
   data: () => ({
-    rowsPerPageItems:  [5, 10, 20, 30, 40],
+    rowsPerPageItems: [5, 10, 20, 30, 40],
     pagination: {
-      rowsPerPage: 10,
-      
+      rowsPerPage: 10
     },
+    itemDelete: null,
     dialogDelete: false,
     dialog: false,
     headers: [
@@ -107,12 +104,6 @@ export default {
     }
   },
 
-  watch: {
-    dialog(val) {
-      val || this.close();
-    }
-  },
-
   created() {
     this.initialize();
   },
@@ -138,26 +129,40 @@ export default {
     },
 
     deleteItem(item) {
-      const index = this.desserts.indexOf(item);
-      this.desserts.splice(index, 1);
+      this.dialogDelete = true;
+      this.itemDelete = item;
+    },
+    deleteItems() {
+      const index = this.desserts.indexOf(this.itemDelete);
+      // c1  this.desserts.splice(index, 1);
+      this.desserts = this.desserts.filter((v,k) => k !== index);
       this.dialogDelete = false;
     },
     close() {
       this.dialog = false;
-      setTimeout(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+      this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
-      }, 300);
+      // setTimeout(() => {
+      //   this.editedItem = Object.assign({}, this.defaultItem);
+      //   this.editedIndex = -1;
+      // }, 300);
     },
-
-    save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
-      } else {
-        this.desserts.push(this.editedItem);
-      }
+    saveData() {
+      this.desserts.push(this.editedItem);
+      this.close();
+    },
+    editData() {
+      Object.assign(this.desserts[this.editedIndex], this.editedItem);
       this.close();
     }
+    // save() {
+    //   if (this.editedIndex > -1) {
+    //     Object.assign(this.desserts[this.editedIndex], this.editedItem);
+    //   } else {
+    //     this.desserts.push(this.editedItem);
+    //   }
+    //   this.close();
+    // }
   }
 };
 </script>

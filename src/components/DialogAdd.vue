@@ -7,13 +7,12 @@
       <v-card-text>
         <v-container>
           <v-layout wrap>
-            <v-form ref="form" lazy-validation>
+            <v-form ref="form" >
               <v-flex xs12 sm12 md12>
                 <v-text-field
                   v-model="editedItem.name"
                   placeholder="Name"
                   :rules="nameRules"
-                  required
                   autofocus
                   clearable
                   prepend-icon="person"
@@ -34,12 +33,27 @@
                   min-width="290px"
                 >
                   <template v-slot:activator="{ on }">
-                    <v-text-field color="green darken-1 white--text" v-model="editedItem.created" prepend-icon="event" readonly v-on="on"></v-text-field>
+                    <v-text-field
+                      color="green darken-1 white--text"
+                      v-model="editedItem.created"
+                      prepend-icon="event"
+                      readonly
+                      v-on="on"
+                    ></v-text-field>
                   </template>
-                  <v-date-picker v-model="editedItem.created" no-title scrollable color="green darken-1 white--text">
+                  <v-date-picker
+                    v-model="editedItem.created"
+                    no-title
+                    scrollable
+                    color="green darken-1 white--text"
+                  >
                     <v-spacer></v-spacer>
                     <v-btn flat color="green darken-1 white--text" @click="menu = false">Cancel</v-btn>
-                    <v-btn flat color="green darken-1 white--text" @click="$refs.menu.save(editedItem.created)">OK</v-btn>
+                    <v-btn
+                      flat
+                      color="green darken-1 white--text"
+                      @click="$refs.menu.save(editedItem.created)"
+                    >OK</v-btn>
                   </v-date-picker>
                 </v-menu>
               </v-flex>
@@ -49,7 +63,7 @@
                   prepend-icon="email"
                   placeholder="Email"
                   :rules="emailRules"
-                  required
+                  
                   clearable
                   color="green darken-1 white--text"
                 ></v-text-field>
@@ -70,7 +84,6 @@
                   :items="roles"
                   label="Role"
                   :rules="roleRules"
-                  required
                   prepend-icon="settings"
                   color="green darken-1 white--text"
                 ></v-select>
@@ -101,10 +114,12 @@ export default {
     dialog: Boolean,
     formTitle: String,
     editedItem: Object,
-    roles: Array
+    roles: Array,
+    editedIndex: Number
   },
   data() {
     return {
+      item: "",
       date: new Date().toISOString().substr(0, 10),
       menu: false,
       nameRules: [
@@ -121,22 +136,24 @@ export default {
   methods: {
     validate() {
       if (this.$refs.form.validate()) {
-        // this.snackbar = true;
-        // console.log(this.snackbar);
-        this.$emit("saveData");
+        if (this.editedIndex > -1) {
+          this.$emit("editData");
+        } else {
+          this.$emit("saveData");
+          this.$refs.form.resetValidation();
+        }
       }
     },
     close() {
+      this.$refs.form.resetValidation();
       this.$emit("closeModel");
     }
-  }
+  },
+  
 };
 </script>
 <style>
-/* div.error--text {
-  color: red !important;
-} */
-form{
+form {
   width: 100%;
 }
 </style>

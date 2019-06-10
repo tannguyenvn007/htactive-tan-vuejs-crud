@@ -17,7 +17,6 @@
   export default {
     props: {
         dialogDelete: Boolean,
-        user: Array
     },
     methods: {
         yes(){
