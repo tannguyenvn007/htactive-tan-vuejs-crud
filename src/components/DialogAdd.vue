@@ -1,13 +1,13 @@
 <template>
-  <v-dialog :value="dialog" @input="close" max-width="500px">
+  <v-dialog :value="dialog" @input="closeModal" max-width="500px">
     <v-card>
       <v-card-title>
-        <span class="headline">{{ formTitle }}</span>
+        <span class="headline">{{ getFormTitle }}</span>
       </v-card-title>
       <v-card-text>
         <v-container>
           <v-layout wrap>
-            <v-form ref="form" >
+            <v-form ref="form">
               <v-flex xs12 sm12 md12>
                 <v-text-field
                   v-model="editedItem.name"
@@ -25,7 +25,7 @@
                   v-model="menu"
                   :close-on-content-click="false"
                   :nudge-right="40"
-                  :return-value.sync="editedItem.created"
+                  :return-value.sync="editedItem.createdAt"
                   lazy
                   transition="scale-transition"
                   offset-y
@@ -35,14 +35,14 @@
                   <template v-slot:activator="{ on }">
                     <v-text-field
                       color="green darken-1 white--text"
-                      v-model="editedItem.created"
+                      v-model="editedItem.createdAt"
                       prepend-icon="event"
                       readonly
                       v-on="on"
                     ></v-text-field>
                   </template>
                   <v-date-picker
-                    v-model="editedItem.created"
+                    v-model="editedItem.createdAt"
                     no-title
                     scrollable
                     color="green darken-1 white--text"
@@ -52,7 +52,7 @@
                     <v-btn
                       flat
                       color="green darken-1 white--text"
-                      @click="$refs.menu.save(editedItem.created)"
+                      @click="$refs.menu.save(editedItem.createdAt)"
                     >OK</v-btn>
                   </v-date-picker>
                 </v-menu>
@@ -63,7 +63,6 @@
                   prepend-icon="email"
                   placeholder="Email"
                   :rules="emailRules"
-                  
                   clearable
                   color="green darken-1 white--text"
                 ></v-text-field>
@@ -81,7 +80,7 @@
               <v-flex xs12 sm12 md12>
                 <v-select
                   v-model="editedItem.role"
-                  :items="roles"
+                  :items="getRole"
                   label="Role"
                   :rules="roleRules"
                   prepend-icon="settings"
@@ -101,7 +100,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="green darken-1 white--text" flat @click="close">Cancel</v-btn>
+        <v-btn color="green darken-1 white--text" flat @click="closeModal">Cancel</v-btn>
         <v-btn color="green darken-1 white--text" flat @click="validate">Save</v-btn>
       </v-card-actions>
     </v-card>
@@ -109,17 +108,16 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from "vuex";
 export default {
   props: {
     dialog: Boolean,
-    formTitle: String,
     editedItem: Object,
-    roles: Array,
     editedIndex: Number
   },
   data() {
     return {
-      date: new Date().toISOString().substr(0, 10),
+      
       menu: false,
       nameRules: [
         v => !!v || "Name is required"
@@ -132,23 +130,33 @@ export default {
       roleRules: [v => !!v || "Role is required"]
     };
   },
+  computed: {
+    ...mapGetters("Admin", [
+      "getFormTitle",
+      "getDialog",
+      "getRole",
+      "getEditedIndex"
+    ])
+  },
   methods: {
     validate() {
       if (this.$refs.form.validate()) {
         if (this.editedIndex > -1) {
-          this.$emit("editData");
+          console.log(this.editedItem)
+          this.editData({item: this.editedItem, index: this.editedIndex});
+          this.closeModal();
         } else {
-          this.$emit("saveData");
-          this.$refs.form.resetValidation();
+          this.saveData(this.editedItem);
+          this.closeModal();
         }
-      }
+       }
     },
-    close() {
+    closeModal() {
       this.$refs.form.resetValidation();
-      this.$emit("closeModel");
-    }
-  },
-  
+      this.$emit("closeDialog");
+    },
+    ...mapActions("Admin", ["saveData", "editData"])
+  }
 };
 </script>
 <style>
